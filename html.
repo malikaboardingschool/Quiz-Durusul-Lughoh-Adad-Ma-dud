@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game: Malika Mart `Adad wal Ma'dud`</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FFF8E1; /* Warna krem lembut */
+        }
+        .font-amiri {
+            font-family: 'Amiri', serif;
+            direction: rtl; /* Teks Arab dari kanan ke kiri */
+        }
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .btn-option, .btn-group {
+            transition: all 0.2s ease;
+        }
+        .btn-option:hover, .btn-group:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .correct {
+            background-color: #22c55e !important; /* Hijau */
+            color: white !important;
+            border-color: #16a34a !important;
+        }
+        .incorrect {
+            background-color: #ef4444 !important; /* Merah */
+            color: white !important;
+            border-color: #dc2626 !important;
+        }
+        #customer-img-container {
+            width: 150px;
+            height: 150px;
+        }
+        .speech-bubble {
+            position: relative;
+            background: #e2e8f0;
+            border-radius: .4em;
+        }
+        .speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border: 20px solid transparent;
+            border-top-color: #e2e8f0;
+            border-bottom: 0;
+            border-left: 0;
+            margin-left: -10px;
+            margin-bottom: -20px;
+        }
+    </style>
+</head>
+<body class="bg-amber-50 flex items-center justify-center min-h-screen p-4">
+
+    <div id="game-container" class="game-card w-full max-w-2xl p-6 md:p-8 text-center">
+        <!-- Tampilan Awal -->
+        <div id="start-screen">
+            <img src="https://iili.io/FsLlXA7.png" alt="Logo Malika Mart" class="mx-auto mb-4 w-24 h-24">
+            <h1 class="text-3xl md:text-4xl font-bold text-amber-600">Selamat Datang di <span class="text-green-600">Malika Arabic Game</span> `Adad wal Ma'dud!</h1>
+            <p class="text-gray-600 mt-4 mb-8">Anda adalah santri durusul lughoh terbaik. Jawab dengan memilih jawaban yang tepat. Silakan pilih kelompokmu untuk memulai!</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="startGame(1)" class="btn-group bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg">Kelompok 1 (Peralatan Sekolah)</button>
+                <button onclick="startGame(2)" class="btn-group bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg">Kelompok 2 (Buah-buahan)</button>
+                <button onclick="startGame(3)" class="btn-group bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg">Kelompok 3 (Hewan)</button>
+                <button onclick="startGame(4)" class="btn-group bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg">Kelompok 4 (Di Dalam Rumah)</button>
+                <button onclick="startGame(5)" class="btn-group bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg col-span-1 md:col-span-2">Kelompok 5 (Pakaian)</button>
+            </div>
+            
+            <div id="scoreboard-container" class="mt-8 border-t-2 pt-6"></div>
+            <button onclick="resetScores()" class="mt-4 bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg text-sm shadow-lg">Reset Semua Skor</button>
+        </div>
+
+        <!-- Tampilan Game Utama -->
+        <div id="game-screen" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <div><span class="font-bold text-lg" id="group-name"></span></div>
+                <div class="text-lg font-semibold">Skor: <span id="score" class="text-amber-600 font-bold">0</span></div>
+            </div>
+             <div class="text-lg font-semibold mb-4">Soal <span id="question-counter">1</span> / <span id="total-questions">8</span></div>
+
+
+            <div class="flex flex-col items-center justify-center space-y-4 my-6">
+                 <div class="speech-bubble p-4 mb-6">
+                    <p id="order-text" class="text-lg text-gray-800 font-semibold"></p>
+                </div>
+                <div id="customer-img-container" class="bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                    <img id="order-image" src="" alt="Pesanan Pelanggan" class="w-24 h-24 object-contain">
+                </div>
+                <div class="mt-4">
+                    <p class="text-gray-500">Bentuk tunggal (mufrad):</p>
+                    <p id="singular-noun" class="font-amiri text-2xl font-bold text-green-700"></p>
+                </div>
+            </div>
+            
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 font-amiri" id="question-title">مَا هُوَ الصَّحِيْحُ؟</h2>
+            
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Opsi Jawaban akan ditambahkan oleh JavaScript -->
+            </div>
+            <div id="feedback" class="mt-6 text-xl font-bold"></div>
+        </div>
+
+        <!-- Tampilan Akhir -->
+        <div id="end-screen" class="hidden">
+            <h1 class="text-3xl md:text-4xl font-bold text-amber-600">Kerja Bagus, <span id="end-group-name"></span>!</h1>
+             <img src="https://placehold.co/150x150/34D399/FFFFFF?text= ممتاز" alt="Piala" class="my-6 mx-auto rounded-full">
+            <p class="text-gray-600 mt-4 text-xl">Anda telah menyelesaikan semua tantangan!</p>
+            <p class="text-2xl my-4">Skor Akhir Anda:</p>
+            <p id="final-score" class="text-5xl font-bold text-amber-600 mb-8">0</p>
+
+            <div id="end-scoreboard-container" class="my-8 border-t-2 pt-6"></div>
+
+            <button onclick="showStartScreen()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-lg text-lg shadow-lg">Pilih Kelompok Lain</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Bank Soal ---
+        const questionBank = {
+            group1: {
+                name: "Kelompok 1: Peralatan Sekolah",
+                questions: [
+                    { order: "Pesanan: 3 pulpen.", singular: "قَلَمٌ", image: "https://placehold.co/100x100/0000FF/FFFFFF?text=أقلام", options: ["ثَلَاثَةُ أَقْلَامٍ", "ثَلَاثُ أَقْلَامٍ"], correct: "ثَلَاثَةُ أَقْلَامٍ" },
+                    { order: "Pesanan: 1 tas.", singular: "حَقِيْبَةٌ", image: "https://placehold.co/100x100/8B4513/FFFFFF?text=حقيبة", options: ["حَقِيْبَةٌ وَاحِدَةٌ", "حَقِيْبَةٌ وَاحِدٌ"], correct: "حَقِيْبَةٌ وَاحِدَةٌ" },
+                    { order: "Pesanan: 5 buku tulis.", singular: "دَفْتَرٌ", image: "https://placehold.co/100x100/4682B4/FFFFFF?text=دفاتر", options: ["خَمْسُ دَفَاتِرَ", "خَمْسَةُ دَفَاتِرَ"], correct: "خَمْسَةُ دَفَاتِرَ" },
+                    { order: "Pesanan: 8 penggaris.", singular: "مِسْطَرَةٌ", image: "https://placehold.co/100x100/F0E68C/000000?text=مساطر", options: ["ثَمَانِيَةُ مَسَاطِرَ", "ثَمَانِي مَسَاطِرَ"], correct: "ثَمَانِي مَسَاطِرَ" },
+                    { order: "Pesanan: 2 meja.", singular: "مَكْتَبٌ", image: "https://placehold.co/100x100/A0522D/FFFFFF?text=مكتبان", options: ["مَكْتَبَانِ اثْنَانِ", "مَكْتَبَانِ اثْنَتَانِ"], correct: "مَكْتَبَانِ اثْنَانِ" },
+                    { order: "Pesanan: 4 kursi.", singular: "كُرْسِيٌّ", image: "https://placehold.co/100x100/964B00/FFFFFF?text=كراسي", options: ["أَرْبَعَةُ كَرَاسِيَّ", "أَرْبَعُ كَرَاسِيَّ"], correct: "أَرْبَعَةُ كَرَاسِيَّ" },
+                    { order: "Pesanan: 7 penghapus.", singular: "مِمْحَاةٌ", image: "https://placehold.co/100x100/FFC0CB/000000?text=مماح", options: ["سَبْعُ مَمَاحٍ", "سَبْعَةُ مَمَاحٍ"], correct: "سَبْعُ مَمَاحٍ" },
+                    { order: "Pesanan: 10 spidol.", singular: "قَلَمُ حِبْرٍ", image: "https://placehold.co/100x100/000000/FFFFFF?text=أقلام حبر", options: ["عَشَرُ أَقْلَامِ حِبْرٍ", "عَشَرَةُ أَقْلَامِ حِبْرٍ"], correct: "عَشَرَةُ أَقْلَامِ حِبْرٍ" },
+                ]
+            },
+            group2: {
+                name: "Kelompok 2: Buah-buahan",
+                questions: [
+                    { order: "Pesanan: 6 apel.", singular: "تُفَّاحَةٌ", image: "https://placehold.co/100x100/FF0000/FFFFFF?text=تفاحات", options: ["سِتُّ تُفَّاحَاتٍ", "سِتَّةُ تُفَّاحَاتٍ"], correct: "سِتُّ تُفَّاحَاتٍ" },
+                    { order: "Pesanan: 1 semangka.", singular: "بِطِّيْخَةٌ", image: "https://placehold.co/100x100/228B22/FFFFFF?text=بطيخة", options: ["بِطِّيْخَةٌ وَاحِدَةٌ", "بِطِّيْخَةٌ وَاحِدٌ"], correct: "بِطِّيْخَةٌ وَاحِدَةٌ" },
+                    { order: "Pesanan: 9 jeruk.", singular: "بُرْتُقَالَةٌ", image: "https://placehold.co/100x100/FFA500/FFFFFF?text=برتقالات", options: ["تِسْعَةُ بُرْتُقَالَاتٍ", "تِسْعُ بُرْتُقَالَاتٍ"], correct: "تِسْعُ بُرْتُقَالَاتٍ" },
+                    { order: "Pesanan: 4 pisang.", singular: "مَوْزَةٌ", image: "https://placehold.co/100x100/FFFF00/000000?text=موزات", options: ["أَرْبَعَةُ مَوْزَاتٍ", "أَرْبَعُ مَوْزَاتٍ"], correct: "أَرْبَعُ مَوْزَاتٍ" },
+                    { order: "Pesanan: 10 kurma.", singular: "تَمْرَةٌ", image: "https://placehold.co/100x100/8B4513/FFFFFF?text=تمرات", options: ["عَشَرُ تَمَرَاتٍ", "عَشْرَةُ تَمَرَاتٍ"], correct: "عَشَرُ تَمَرَاتٍ" },
+                    { order: "Pesanan: 3 anggur.", singular: "عِنَبٌ", image: "https://placehold.co/100x100/800080/FFFFFF?text=أعناب", options: ["ثَلَاثَةُ أَعْنَابٍ", "ثَلَاثُ أَعْنَابٍ"], correct: "ثَلَاثَةُ أَعْنَابٍ" },
+                    { order: "Pesanan: 8 stroberi.", singular: "فَرَاوِلَةٌ", image: "https://placehold.co/100x100/FF4500/FFFFFF?text=فراولات", options: ["ثَمَانِيَةُ فَرَاوِلَاتٍ", "ثَمَانِي فَرَاوِلَاتٍ"], correct: "ثَمَانِي فَرَاوِلَاتٍ" },
+                    { order: "Pesanan: 2 mangga.", singular: "مَانْجَا", image: "https://placehold.co/100x100/FF8C00/FFFFFF?text=مانجوان", options: ["مَانْجَوَانِ اثْنَانِ", "مَانْجَوَانِ اثْنَتَانِ"], correct: "مَانْجَوَانِ اثْنَانِ" },
+                ]
+            },
+            group3: {
+                name: "Kelompok 3: Hewan",
+                questions: [
+                    { order: "Pesanan: 5 kucing.", singular: "قِطَّةٌ", image: "https://placehold.co/100x100/808080/FFFFFF?text=قطط", options: ["خَمْسُ قِطَطٍ", "خَمْسَةُ قِطَطٍ"], correct: "خَمْسُ قِطَطٍ" },
+                    { order: "Pesanan: 2 anjing.", singular: "كَلْبٌ", image: "https://placehold.co/100x100/D2691E/FFFFFF?text=كلبان", options: ["كَلْبَانِ اثْنَتَانِ", "كَلْبَانِ اثْنَانِ"], correct: "كَلْبَانِ اثْنَانِ" },
+                    { order: "Pesanan: 7 ikan.", singular: "سَمَكَةٌ", image: "https://placehold.co/100x100/1E90FF/FFFFFF?text=أسماك", options: ["سَبْعَةُ أَسْمَاكٍ", "سَبْعُ أَسْمَاكٍ"], correct: "سَبْعَةُ أَسْمَاكٍ" },
+                    { order: "Pesanan: 1 burung.", singular: "طَائِرٌ", image: "https://placehold.co/100x100/87CEEB/000000?text=طائر", options: ["طَائِرٌ وَاحِدَةٌ", "طَائِرٌ وَاحِدٌ"], correct: "طَائِرٌ وَاحِدٌ" },
+                    { order: "Pesanan: 9 ayam.", singular: "دَجَاجَةٌ", image: "https://placehold.co/100x100/FFD700/000000?text=دجاجات", options: ["تِسْعُ دَجَاجَاتٍ", "تِسْعَةُ دَجَاجَاتٍ"], correct: "تِسْعُ دَجَاجَاتٍ" },
+                    { order: "Pesanan: 3 gajah.", singular: "فِيْلٌ", image: "https://placehold.co/100x100/C0C0C0/000000?text=أفيال", options: ["ثَلَاثَةُ أَفْيَالٍ", "ثَلَاثُ أَفْيَالٍ"], correct: "ثَلَاثَةُ أَفْيَالٍ" },
+                    { order: "Pesanan: 6 sapi.", singular: "بَقَرَةٌ", image: "https://placehold.co/100x100/FFFFFF/000000?text=بقرات", options: ["سِتَّةُ بَقَرَاتٍ", "سِتُّ بَقَرَاتٍ"], correct: "سِتُّ بَقَرَاتٍ" },
+                    { order: "Pesanan: 10 semut.", singular: "نَمْلَةٌ", image: "https://placehold.co/100x100/000000/FFFFFF?text=نملات", options: ["عَشَرُ نَمَلَاتٍ", "عَشْرَةُ نَمَلَاتٍ"], correct: "عَشَرُ نَمَلَاتٍ" },
+                ]
+            },
+            group4: {
+                name: "Kelompok 4: Di Dalam Rumah",
+                questions: [
+                    { order: "Pesanan: 8 pintu.", singular: "بَابٌ", image: "https://placehold.co/100x100/8B4513/FFFFFF?text=أبواب", options: ["ثَمَانِيَةُ أَبْوَابٍ", "ثَمَانِي أَبْوَابٍ"], correct: "ثَمَانِيَةُ أَبْوَابٍ" },
+                    { order: "Pesanan: 6 jendela.", singular: "نَافِذَةٌ", image: "https://placehold.co/100x100/ADD8E6/000000?text=نوافذ", options: ["سِتَّةُ نَوَافِذَ", "سِتُّ نَوَافِذَ"], correct: "سِتُّ نَوَافِذَ" },
+                    { order: "Pesanan: 1 lemari.", singular: "خِزَانَةٌ", image: "https://placehold.co/100x100/DEB887/000000?text=خزانة", options: ["خِزَانَةٌ وَاحِدَةٌ", "خِزَانَةٌ وَاحِدٌ"], correct: "خِزَانَةٌ وَاحِدَةٌ" },
+                    { order: "Pesanan: 3 kunci.", singular: "مِفْتَاحٌ", image: "https://placehold.co/100x100/FFD700/000000?text=مفاتيح", options: ["ثَلَاثُ مَفَاتِيْحَ", "ثَلَاثَةُ مَفَاتِيْحَ"], correct: "ثَلَاثَةُ مَفَاتِيْحَ" },
+                    { order: "Pesanan: 10 bantal.", singular: "وِسَادَةٌ", image: "https://placehold.co/100x100/F5F5DC/000000?text=وسائد", options: ["عَشْرَةُ وَسَائِدَ", "عَشْرُ وَسَائِدَ"], correct: "عَشْرُ وَسَائِدَ" },
+                    { order: "Pesanan: 4 kamar.", singular: "غُرْفَةٌ", image: "https://placehold.co/100x100/708090/FFFFFF?text=غرف", options: ["أَرْبَعُ غُرَفٍ", "أَرْبَعَةُ غُرَفٍ"], correct: "أَرْبَعُ غُرَفٍ" },
+                    { order: "Pesanan: 9 lampu.", singular: "مِصْبَاحٌ", image: "https://placehold.co/100x100/FFFFE0/000000?text=مصابيح", options: ["تِسْعَةُ مَصَابِيْحَ", "تِسْعُ مَصَابِيْحَ"], correct: "تِسْعَةُ مَصَابِيْحَ" },
+                    { order: "Pesanan: 2 tempat tidur.", singular: "سَرِيْرٌ", image: "https://placehold.co/100x100/A52A2A/FFFFFF?text=سريران", options: ["سَرِيْرَانِ اثْنَتَانِ", "سَرِيْرَانِ اثْنَانِ"], correct: "سَرِيْرَانِ اثْنَانِ" },
+                ]
+            },
+            group5: {
+                name: "Kelompok 5: Pakaian",
+                questions: [
+                    { order: "Pesanan: 4 kemeja.", singular: "قَمِيْصٌ", image: "https://placehold.co/100x100/0000CD/FFFFFF?text=قمصان", options: ["أَرْبَعُ قُمْصَانٍ", "أَرْبَعَةُ قُمْصَانٍ"], correct: "أَرْبَعَةُ قُمْصَانٍ" },
+                    { order: "Pesanan: 1 topi.", singular: "قُبَّعَةٌ", image: "https://placehold.co/100x100/000000/FFFFFF?text=قبعة", options: ["قُبَّعَةٌ وَاحِدَةٌ", "قُبَّعَةٌ وَاحِدٌ"], correct: "قُبَّعَةٌ وَاحِدَةٌ" },
+                    { order: "Pesanan: 7 kaus kaki.", singular: "جَوْرَبٌ", image: "https://placehold.co/100x100/FFFFFF/000000?text=جوارب", options: ["سَبْعَةُ جَوَارِبَ", "سَبْعُ جَوَارِبَ"], correct: "سَبْعَةُ جَوَارِبَ" },
+                    { order: "Pesanan: 2 sepatu.", singular: "حِذَاءٌ", image: "https://placehold.co/100x100/4B0082/FFFFFF?text=حذاءان", options: ["حِذَاءَانِ اثْنَانِ", "حِذَاءَانِ اثْنَتَانِ"], correct: "حِذَاءَانِ اثْنَانِ" },
+                    { order: "Pesanan: 9 celana.", singular: "سِرْوَالٌ", image: "https://placehold.co/100x100/191970/FFFFFF?text=سراويل", options: ["تِسْعُ سَرَاوِيْلَ", "تِسْعَةُ سَرَاوِيْلَ"], correct: "تِسْعَةُ سَرَاوِيْلَ" },
+                    { order: "Pesanan: 3 gaun.", singular: "فُسْتَانٌ", image: "https://placehold.co/100x100/FF69B4/FFFFFF?text=فساتين", options: ["ثَلَاثُ فَسَاتِيْنَ", "ثَلَاثَةُ فَسَاتِيْنَ"], correct: "ثَلَاثَةُ فَسَاتِيْنَ" },
+                    { order: "Pesanan: 8 rok.", singular: "تَنُّوْرَةٌ", image: "https://placehold.co/100x100/DB7093/FFFFFF?text=تنانير", options: ["ثَمَانِي تَنَانِيْرَ", "ثَمَانِيَةُ تَنَانِيْرَ"], correct: "ثَمَانِي تَنَانِيْرَ" },
+                    { order: "Pesanan: 5 jaket.", singular: "سُتْرَةٌ", image: "https://placehold.co/100x100/2F4F4F/FFFFFF?text=ستر", options: ["خَمْسَةُ سُتَرٍ", "خَمْسُ سُتَرٍ"], correct: "خَمْسُ سُتَرٍ" },
+                ]
+            },
+        };
+
+        // --- Variabel Game & Papan Skor ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let currentQuestions = [];
+        let currentGroupName = "";
+
+        let groupScores = {
+            "Kelompok 1: Peralatan Sekolah": { name: "Kelompok 1: Peralatan Sekolah", score: 0 },
+            "Kelompok 2: Buah-buahan": { name: "Kelompok 2: Buah-buahan", score: 0 },
+            "Kelompok 3: Hewan": { name: "Kelompok 3: Hewan", score: 0 },
+            "Kelompok 4: Di Dalam Rumah": { name: "Kelompok 4: Di Dalam Rumah", score: 0 },
+            "Kelompok 5: Pakaian": { name: "Kelompok 5: Pakaian", score: 0 },
+        };
+
+        // --- Elemen DOM ---
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+        const scoreDisplay = document.getElementById('score');
+        const groupNameDisplay = document.getElementById('group-name');
+        const endGroupNameDisplay = document.getElementById('end-group-name');
+        const questionCounter = document.getElementById('question-counter');
+        const totalQuestions = document.getElementById('total-questions');
+        const orderText = document.getElementById('order-text');
+        const orderImage = document.getElementById('order-image');
+        const singularNounDisplay = document.getElementById('singular-noun');
+        const optionsContainer = document.getElementById('options-container');
+        const feedback = document.getElementById('feedback');
+        const finalScore = document.getElementById('final-score');
+        const scoreboardContainer = document.getElementById('scoreboard-container');
+        const endScoreboardContainer = document.getElementById('end-scoreboard-container');
+        
+        // --- Fungsi Papan Skor ---
+        function updateScoreboardDisplay(container) {
+            container.innerHTML = '<h2 class="text-2xl font-bold text-gray-700 mb-4">Papan Skor Tertinggi</h2>';
+
+            const sortedScores = Object.values(groupScores).sort((a, b) => b.score - a.score);
+
+            const list = document.createElement('div');
+            list.className = 'space-y-2 text-left';
+
+            sortedScores.forEach((group, index) => {
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center p-3 rounded-lg text-sm md:text-base';
+                
+                let medal = '';
+                if (index === 0 && group.score > 0) {
+                    medal = '🥇';
+                    item.classList.add('bg-amber-100');
+                } else if (index === 1 && group.score > 0) {
+                    medal = '🥈';
+                    item.classList.add('bg-gray-200');
+                } else if (index === 2 && group.score > 0) {
+                    medal = '🥉';
+                    item.classList.add('bg-orange-100');
+                } else {
+                    item.classList.add('bg-gray-100');
+                }
+
+                item.innerHTML = `
+                    <span class="font-semibold text-gray-800">${medal} ${group.name.replace(/:\s.*$/, '')}</span>
+                    <span class="font-bold text-lg text-amber-700">${group.score}</span>
+                `;
+                list.appendChild(item);
+            });
+            container.appendChild(list);
+        }
+
+        // --- Fungsi-fungsi Game ---
+        function resetScores() {
+            for (const key in groupScores) {
+                groupScores[key].score = 0;
+            }
+            updateScoreboardDisplay(scoreboardContainer);
+            updateScoreboardDisplay(endScoreboardContainer);
+        }
+
+        function startGame(groupNumber) {
+            currentQuestionIndex = 0;
+            score = 0;
+            const selectedGroupKey = 'group' + groupNumber;
+            const selectedGroup = questionBank[selectedGroupKey];
+            
+            currentGroupName = selectedGroup.name;
+            currentQuestions = selectedGroup.questions.sort(() => Math.random() - 0.5); // Acak soal
+            
+            totalQuestions.textContent = currentQuestions.length;
+            groupNameDisplay.textContent = currentGroupName;
+
+            startScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            resetState();
+            if (currentQuestionIndex >= currentQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const currentQuestion = currentQuestions[currentQuestionIndex];
+            
+            scoreDisplay.textContent = score;
+            questionCounter.textContent = currentQuestionIndex + 1;
+            orderText.textContent = currentQuestion.order;
+            orderImage.src = currentQuestion.image;
+            singularNounDisplay.textContent = currentQuestion.singular;
+
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.innerHTML = option;
+                button.classList.add('btn-option', 'w-full', 'font-amiri', 'text-2xl', 'p-4', 'border-2', 'border-amber-300', 'rounded-lg', 'bg-white', 'text-gray-800', 'hover:bg-amber-100');
+                button.addEventListener('click', () => selectAnswer(button, option, currentQuestion.correct));
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function resetState() {
+            feedback.textContent = '';
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        function selectAnswer(button, selectedOption, correctAnswer) {
+            const allButtons = optionsContainer.querySelectorAll('button');
+            allButtons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.innerHTML === correctAnswer) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                score += 10;
+                feedback.textContent = "Jawaban Tepat! (صَحِيْحٌ)";
+                feedback.classList.add('text-green-500');
+                feedback.classList.remove('text-red-500');
+                button.classList.add('correct');
+            } else {
+                feedback.textContent = "Kurang Tepat! (خَطَأٌ)";
+                feedback.classList.add('text-red-500');
+                feedback.classList.remove('text-green-500');
+                button.classList.add('incorrect');
+            }
+            
+            scoreDisplay.textContent = score;
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                loadQuestion();
+            }, 2000); 
+        }
+        
+        function endGame() {
+            gameScreen.classList.add('hidden');
+            endScreen.classList.remove('hidden');
+            finalScore.textContent = score;
+            endGroupNameDisplay.textContent = currentGroupName;
+
+            // Update skor tertinggi jika skor saat ini lebih besar
+            if (score > groupScores[currentGroupName].score) {
+                groupScores[currentGroupName].score = score;
+            }
+            updateScoreboardDisplay(endScoreboardContainer);
+        }
+
+        function showStartScreen() {
+            endScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            updateScoreboardDisplay(scoreboardContainer);
+        }
+
+        // --- Panggil Papan Skor Saat Pertama Kali Membuka ---
+        window.onload = () => {
+            updateScoreboardDisplay(scoreboardContainer);
+        };
+
+    </script>
+</body>
+</html>
+
